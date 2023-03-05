@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 @Getter(AccessLevel.MODULE)
@@ -21,18 +23,11 @@ public class TCPClient<T> {
 
     @SneakyThrows
     public void receive(Consumer<T> dataHandler) {
-        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        String line;
-        StringBuilder requestBuilder = new StringBuilder();
-        while ((line = in.readLine()) != null) {
-            requestBuilder.append(line);
-            if (line.isEmpty()) {
-                break;
-            }
-        }
-        String request = requestBuilder.toString().trim();
+        InputStream inputStream = socket.getInputStream();
+        byte[] buffer = new byte[1024];
+        int bytesRead = inputStream.read(buffer);
+        String request = new String(buffer, 0, bytesRead).trim();
         if (!request.isEmpty()) {
-            System.out.println("Received data: " + request);
             dataHandler.accept((T) request);
         }
     }
