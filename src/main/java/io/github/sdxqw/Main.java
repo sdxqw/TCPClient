@@ -3,19 +3,15 @@ package io.github.sdxqw;
 import io.github.sdxqw.server.TCPServer;
 import lombok.SneakyThrows;
 
-import java.util.Objects;
-
 public class Main {
     @SneakyThrows
     public static void main(String[] args) {
-        new TCPServer<String>(1212).accept(client -> {
-            client.send("Hello, World!");
-            client.receive(data -> {
-                System.out.println("Received data: " + data);
-                if (Objects.equals(data, "exit")) {
-                    client.close();
-                }
-            });
+        TCPServer<String> server = new TCPServer<>("localhost", 8080);
+        server.accept(client -> {
+            client.send("Hello, world!");
+            client.receive(request -> System.out.println("Received request: " + request));
         });
+
+        server.close();
     }
 }
